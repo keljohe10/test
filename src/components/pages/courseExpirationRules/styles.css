@@ -3585,7 +3585,7 @@
 
 .animated.delay-4s {
   -webkit-animation-delay: 4s;
-  animation-delay: 4s;
+  animation-delay: 4s; 
 }
 
 .animated.delay-5s {
