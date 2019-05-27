@@ -1,0 +1,13 @@
+.appbar {
+    z-index: 10000;
+    background: #fff;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.197);
+    position: fixed;
+    top: 0;
+    width: 100%;    
+    transition: all .3s ease-out;
+    will-change: transform;   
+    display: flex;  
+    justify-content: center; -ms-flex-align: center;
+    align-items: center;
+}
