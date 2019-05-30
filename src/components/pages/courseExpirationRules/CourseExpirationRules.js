@@ -1,204 +1,464 @@
 import React from 'react';
 import './styles.css';
-import {
-  Spinner,
-  Form,
-  Table,
-  ButtonToolbar,
-  Button,
-  InputGroup
-} from 'react-bootstrap';
+import { Form, Table, InputGroup, Alert } from 'react-bootstrap';
+import SweetAlert from 'sweetalert-react'; // eslint-disable-line import/no-extraneous-dependencies
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import swal from 'sweetalert';
 import PropTypes from 'prop-types';
-import { getCourseExpirationRules } from '../../../api/courseExpirationRules';
-
-
+import {
+  getCourseExpirationRules,
+  postCourseExpirationRules
+} from '../../../api/courseExpirationRules';
+const moment = require('moment');
 
 class CourseExpirarionRules extends React.Component {
   constructor(props) {
     super(props);
-     
-    
-    this.state = {
-      test: 'value',
-      loading: false,
-      startDate: new Date()
-    };
 
+    this.state = {
+      arraySettingProvBoard: [],
+      settingHeader: {},
+      newSettingHeader: {},
+      AlterDone: false,
+      hasError: false,
+      startDate: new Date(),
+      flagAdd: false
+    };
     this._onChange = this._onChange.bind(this);
-    this.handleChange = this.handleChange.bind(this);
+    this.handleChangeMonthInactive = this.handleChangeMonthInactive.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleDate = this.handleDate.bind(this);
+    this.handleAdd = this.handleAdd.bind(this);
   }
   componentDidMount() {
-    const boardProvTypeId = parseInt(this.props.boardprov);
-    console.log(boardProvTypeId);
-    
-    getCourseExpirationRules(boardProvTypeId).then(response => {
-      console.log(response)
+    const boardProvTypeId = parseInt(this.props.params.boardprov);
 
-    }).catch(error => console.log(error)); 
+    getCourseExpirationRules(boardProvTypeId)
+      .then(response => {
+        this.setState({
+          arraySettingProvBoard: response.data.data
+        });
+      })
+      .catch(error => this.setState({ hasError: true }));
   }
-  
-  handleChange(date) {
-    this.setState({
-      startDate: date
+  handleChangeMonthInactive(e) {
+    var monthInactive;
+
+    if (this.state.flagAdd === true) {
+      monthInactive = this.state.newSettingHeader;
+    } else {
+      monthInactive = this.state.settingHeader;
+    }
+    if (e.target.value >= 0) {
+      if (e.target.id === 'anytime') {
+        monthInactive.amAnytimeInactive = Number(e.target.value);
+      }
+      if (e.target.id === 'live') {
+        monthInactive.amLiveInactive = Number(e.target.value);
+      }
+
+      if (this.state.flagAdd === true) {
+        this.setState({
+          newSettingHeader: monthInactive
+        });
+      } else {
+        this.setState({
+          settingHeader: monthInactive
+        });
+      }
+    }
+  }
+  handleActiveMonth = idx => evt => {
+    var setMonthExpire;
+    if (this.state.flagAdd === true) {
+      setMonthExpire = this.state.newSettingHeader;
+    } else {
+      setMonthExpire = this.state.settingHeader;
+    }
+
+    setMonthExpire.settingDetails.map(item => {
+      if (item.idSettingRulesDetail === idx.idSettingRulesDetail) {
+        if (evt.target.type === 'checkbox') {
+          item.inExpire = evt.target.checked;
+          return item;
+        }
+        if (evt.target.type === 'number' && evt.target.value >= 0) {
+          console.log(item);
+          item.amActive = Number(evt.target.value);
+          return item;
+        }
+      }
+      if (this.state.flagAdd === true) {
+        this.setState({
+          newSettingHeader: setMonthExpire
+        });
+      } else {
+        this.setState({
+          settingHeader: setMonthExpire
+        });
+      }
+    });
+  };
+  _onChange(value) {
+    const itemsfilter = this.state.arraySettingProvBoard;
+
+    const result = itemsfilter.filter(
+      itemsfilter => itemsfilter.idSetting == value.target.value
+    );
+    result.map(i =>
+      this.setState({
+        settingHeader: i
+      })
+    );
+  }
+  handleSubmit(e) {
+    e.preventDefault();
+    var dataUpdate;
+    if (this.state.flagAdd === true) {
+      dataUpdate = this.state.newSettingHeader;
+    } else {
+      dataUpdate = this.state.settingHeader;
+      dataUpdate.dtSetting = moment(dataUpdate.dtSetting).format('MM/DD/YYYY');
+    }
+
+    dataUpdate.settingDetails.map(
+      item => (item.inExpire = item.inExpire ? 1 : 0)
+    );
+
+    postCourseExpirationRules(dataUpdate)
+      .then(() => {
+        swal({
+          title: 'Done!',
+          icon: 'success',
+          button: true
+        }).then(value => {
+          if (value) {
+            window.location.reload();
+          }
+        });
+      })
+      .catch(err => {
+        console.error(err.errors);
+        swal({
+          title: 'Warning!',
+          text:
+            'An unexpected error has occurred please contact the system administrator.',
+          icon: 'warning',
+          button: true
+        });
+      });
+  }
+  handleDate(date) {
+    if (date > new Date()) {
+      swal({
+        title: 'Warning!',
+        text: 'the date is greater than the current date',
+        icon: 'warning',
+        button: true
+      });
+    } else {
+      this.setState({
+        startDate: date
+      });
+    }
+  }
+  handleAdd(e) {
+    const newSettingSplice = this.state.arraySettingProvBoard.splice(
+      this.state.arraySettingProvBoard.length - 1
+    );
+    const newSetting = newSettingSplice.map(i => {
+      i.dtSetting = moment(this.state.startDate).format('MM/DD/YYYY');
+      i.amLiveInactive = 0;
+      i.amAnytimeInactive = 0;
+      i.idSetting = null;
+
+      i.settingDetails.map(item => {
+        item.inExpire = 0;
+        item.amActive = 0;
+        return item;
+      });
+      return i;
+    });
+
+    newSetting.map(i => {
+      this.setState({
+        newSettingHeader: i,
+        flagAdd: true
+      });
     });
   }
-  _onChange(value) {
-    this.setState({ test: value.target.value, loading: true });
-    setTimeout(() => {
-      this.setState({ loading: false });
-    }, 1000);
-  }
   loadingData() {
-    if (this.state.loading) {
-      return (
-        <Spinner animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
+    if (
+      Object.keys(this.state.settingHeader).length !== 0 ||
+      Object.keys(this.state.newSettingHeader).length !== 0
+    ) {
+      var itemParent;
+      var itemSetting;
+      if (this.state.flagAdd === true) {
+        itemParent = this.state.newSettingHeader;
+
+        itemSetting = this.state.newSettingHeader.settingDetails;
+      } else {
+        itemParent = this.state.settingHeader;
+
+        itemSetting = this.state.settingHeader.settingDetails;
+      }
+
+      const itemLive = itemSetting.filter(
+        itemSetting => itemSetting.courseType === 'CD_LIVE'
       );
-    }
-    if (this.state.test !== 'value') {
+      const itemAnytime = itemSetting.filter(
+        itemSetting => itemSetting.courseType === 'CD_ANYTIME'
+      );
+
       return (
         <div className="animated fadeIn">
-          <Table responsive="sm">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-              </tr>
-            </tbody>
-          </Table>
-          <Table responsive="md">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-                <th>Table heading</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-                <td>Table cell</td>
-              </tr>
-            </tbody>
-          </Table>
+          <h5>Provider Application Settings Detail</h5>
+          <p className="text-muted">
+            Please Check the inactive Delivery Methods (With publishing) to be
+            Expired.
+          </p>
+          <hr />
+          <br />
+
+          <form>
+           
+            <Table responsive="md">
+              <thead className="thead-dark">
+                <tr className="">
+                  <th>Course Type: Anytime</th>
+                  <th className="App-align">
+
+                    <div className="container-fluid  pt-1">
+                        <div className="row App-align "> 
+                          <div className="col-sm-4 app-top">
+                            Expire after
+                          </div>
+                          <div className="col-sm-4">
+                          <input
+                  id="anytime"
+                  className="App-date"
+                  type="number"
+                  value={itemParent.amAnytimeInactive}
+                  onChange={this.handleChangeMonthInactive}
+                /> 
+                          </div>
+                          <div className="col-sm-4 app-top">
+                            inactive month
+                          </div>
+                        </div>
+                    </div>
+                  </th>
+                  <th>
+                  
+                  </th>
+                  <th >Active months</th>
+                </tr>
+              </thead>
+              {itemAnytime &&
+                itemAnytime.map((anytime, k) => (
+                  <tbody key={k} className="App-textInput">
+                    <tr >
+                      <td>{anytime.deliveryMethodDesc}</td>
+                      <td className="App-center App-padding">
+                        <div>
+                          <input
+                            type="checkbox"
+                            checked={anytime.inExpire}
+                            onChange={this.handleActiveMonth(anytime)}
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        
+                      </td>
+                      <td>
+                        
+                        <div className="form-group row">
+                          <input
+                            id="anytime"
+                            className="App-active"
+                            type="number"
+                            value={anytime.amActive}
+                            onChange={this.handleActiveMonth(anytime)}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                ))}
+            </Table>
+            &nbsp;
+           <Table responsive="md">
+              <thead className="thead-dark">
+                <tr className="">
+                  <th>Course Type: Live</th>
+                  <th className="App-align">
+
+                    <div className="container-fluid  pt-1">
+                        <div className="row App-align "> 
+                          <div className="col-sm-4 app-top">
+                            Expire after
+                          </div>
+                          <div className="col-sm-4">
+                          <input
+                  id="live"
+                  className="App-date"
+                  type="number"
+                  value={itemParent.amLiveInactive}
+                  onChange={this.handleChangeMonthInactive}
+                /> 
+                          </div>
+                          <div className="col-sm-4 app-top">
+                            inactive month
+                          </div>
+                        </div>
+                    </div>
+                  </th>
+                  <th>
+                  
+                  </th>
+                  <th >Active months</th>
+                </tr>
+              </thead>
+              {itemLive &&
+                itemLive.map((live, k) => (
+                  <tbody key={k} className="App-textInput">
+                    <tr >
+                      <td>{live.deliveryMethodDesc}</td>
+                      <td className="App-center App-padding">
+                        <div>
+                          <input
+                            type="checkbox"
+                            checked={live.inExpire}
+                            onChange={this.handleActiveMonth(live)}
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        
+                      </td>
+                      <td>
+                        <div className="form-group row">
+                          <input
+                            id="live"
+                            className="App-active pl-2"
+                            type="number"
+                            value={live.amActive}
+                            onChange={this.handleActiveMonth(live)}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                ))}
+            </Table>
+            <button
+              className="btn btn-success mb-2"
+              onClick={this.handleSubmit}
+            >
+              Save
+            </button>
+            <SweetAlert
+              show={this.state.AlterDone}
+              title="Setting updated"
+              text="Done"
+              onConfirm={() => this.setState({ AlterDone: false })}
+            />
+          </form>
         </div>
       );
     }
   }
 
   render() {
-
+    const items = this.state.arraySettingProvBoard;
+    if (this.state.hasError) {
+      return (
+        <Alert variant="danger ">
+          An unexpected error has occurred please contact the system
+          administrator.
+        </Alert>
+      );
+    }
     return (
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-4 App-rules">
-            <h3>Course expiration rules</h3>
-            <Form>
-              <Form.Group controlId="exampleForm.ControlSelect1">
-                <Form.Label>Course special rules by approval date</Form.Label>
-                <Form.Control as="select" onChange={this._onChange}>
-                  <option value="value">*Select a setting*</option>
-                  <option value="value1">1</option>
-                  <option value="value2">2</option>
-                  <option value="value3">3</option>
-                  <option value="value4">4</option>
-                  <option value="value5">5</option>
-                </Form.Control>
-
-                <div className="row mt-2">
-                  <div className="col-12">
-                    <InputGroup className="mb-3">
-                      <DatePicker
-                        className="App-date"
-                        selected={this.state.startDate}
-                        onChange={this.handleChange}
-                      />
-                      <InputGroup.Append>
-                        <Button variant="primary"> Add </Button>
-                      </InputGroup.Append>
-                    </InputGroup>
+      <div>
+        <div className="container-fluid ">
+        
+          <div className="row">
+            <div className="col-12 App-rules">
+            <a className ="btn btn-outline-success mb-2" href = {process.env.REACT_APP_URL_SETTING_PROVIDER+'/sa_app_settings.asp'}>  Return </a>
+              <div className="mb-2">
+              <h3>Course expiration rules</h3>
+              
+              <h6>{this.props.params.nmBoard}</h6>
+              <h6 className="text-muted">
+                Apply for Board Approved provider status
+              </h6>
+              <br />
+              <h6 >Course special rules by approval date</h6>
+              </div>              
+              
+              <div className="container-fluid App-search">
+                <div className="row"> 
+                  <div className="col-4 App-container">
+                  <Form>
+                <Form.Group>                  
+                  <Form.Control
+                    as="select"
+                    onChange={this._onChange}
+                  >
+                    <option value="">*Select a settings*</option>
+                    {items &&
+                      items.map((item, key) => (
+                        <option key={key} value={item.idSetting}>
+                          {moment(item.dtSetting, 'YYYY-MM-DD').format(
+                            'MM/DD/YYYY'
+                          )}
+                        </option>
+                      ))}
+                  </Form.Control>
+                </Form.Group>
+              </Form>
+                  </div>
+                  <div className="col-8">
+                  <InputGroup>
+                  <DatePicker
+                    className="App-date"
+                    selected={this.state.startDate}
+                    onChange={this.handleDate}
+                  />
+                  <InputGroup.Append>
+                    <button
+                      className="btn btn-success"
+                      onClick={this.handleAdd}
+                    >
+                      Add setting
+                    </button>
+                  </InputGroup.Append>
+                </InputGroup>
                   </div>
                 </div>
-              </Form.Group>
-            </Form>
-            <ButtonToolbar>
-              <Button variant="success" block>
-                Save
-              </Button>
-            </ButtonToolbar>
+              </div>
+              
+              
+            </div>
           </div>
-          <div className="col-8">{this.loadingData()}</div>
+        </div>
+
+        <div className="container-fluid mt-3">
+          <div className="row">
+            <div className="col-12 App-rules">{this.loadingData()}</div>
+          </div>
         </div>
       </div>
     );
   }
 }
 CourseExpirarionRules.propTypes = {
-  boardprov: PropTypes.string.isRequired
+  boardprov: PropTypes.string,
+  nmBoard: PropTypes.string
 };
 
 export default CourseExpirarionRules;

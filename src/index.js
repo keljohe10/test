@@ -7,7 +7,7 @@ import * as serviceWorker from './serviceWorker';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 ReactDOM.render(
-  <BrowserRouter>
+  <BrowserRouter basename="/sysadm/js/courseExpirationRules/public">
     <Route path="/" component={App} />
   </BrowserRouter>,
   document.getElementById('root')

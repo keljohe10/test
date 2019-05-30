@@ -1,14 +1,13 @@
 import React from 'react';
 import './styles.css';
-import logo from '../assets/ceb-logo.svg';
 
 class Header extends React.Component {
   render() {
     return (
       <div className="appbar pt-3 pb-3">
-        <a href="https://test.cebroker.com">
+        <a href="https://cebroker.com">
           <img
-            src={logo}
+            src={process.env.PUBLIC_URL + '/assets/ceb-logo.svg'}
             alt="CE Broker"
           />
         </a>
