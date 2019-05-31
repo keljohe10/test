@@ -23,13 +23,17 @@ class CourseExpirarionRules extends React.Component {
       AlterDone: false,
       hasError: false,
       startDate: new Date(),
-      flagAdd: false
+      flagAdd: false,
+      disableButtonRefresh: true,
+      disableInputSetting: false,
+      disableOptionDefault: false
     };
     this._onChange = this._onChange.bind(this);
     this.handleChangeMonthInactive = this.handleChangeMonthInactive.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleDate = this.handleDate.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
+    this.enableList = this.enableList.bind(this);
   }
   componentDidMount() {
     const boardProvTypeId = parseInt(this.props.params.boardprov);
@@ -45,13 +49,10 @@ class CourseExpirarionRules extends React.Component {
   handleChangeMonthInactive(e) {
     var monthInactive;
     const {newSettingHeader,settingHeader } = this.state;
-    
+
 
      const newSettingHeaderClone = {...newSettingHeader};
      const settingHeaderClone = {...settingHeader}
-
-     console.log(newSettingHeaderClone);
-     console.log(settingHeaderClone);
 
 
     if (this.state.flagAdd === true) {
@@ -80,10 +81,14 @@ class CourseExpirarionRules extends React.Component {
   }
   handleActiveMonth = idx => evt => {
     var setMonthExpire;
+    const {newSettingHeader,settingHeader } = this.state;
+     const newSettingHeaderClone = {...newSettingHeader};
+     const settingHeaderClone = {...settingHeader}
+
     if (this.state.flagAdd === true) {
-      setMonthExpire = this.state.newSettingHeader;
+      setMonthExpire = newSettingHeaderClone;
     } else {
-      setMonthExpire = this.state.settingHeader;
+      setMonthExpire = settingHeaderClone;
     }
 
     setMonthExpire.settingDetails.map(item => {
@@ -93,7 +98,7 @@ class CourseExpirarionRules extends React.Component {
           return item;
         }
         if (evt.target.type === 'number' && evt.target.value >= 0) {
-          console.log(item);
+
           item.amActive = Number(evt.target.value);
           return item;
         }
@@ -110,24 +115,37 @@ class CourseExpirarionRules extends React.Component {
     });
   };
   _onChange(value) {
-    const itemsfilter = this.state.arraySettingProvBoard;
 
-    const result = itemsfilter.filter(
+    const [...itemsfilter] = this.state.arraySettingProvBoard;
+
+    const [result] = itemsfilter.filter(
       itemsfilter => itemsfilter.idSetting == value.target.value
     );
-    result.map(i =>
+
       this.setState({
-        settingHeader: i
-      })
-    );
+      settingHeader: result,
+      flagAdd: false
+    })
+
+  }
+  enableList(e){
+    e.preventDefault();
+    this.setState({
+      flagAdd: false,
+      disableInputSetting: false,
+      disableButtonRefresh: true
+    })
   }
   handleSubmit(e) {
     e.preventDefault();
     var dataUpdate;
+    const {newSettingHeader,settingHeader } = this.state;
+    const newSettingHeaderClone = {...newSettingHeader};
+    const settingHeaderClone = {...settingHeader}
     if (this.state.flagAdd === true) {
-      dataUpdate = this.state.newSettingHeader;
+      dataUpdate = newSettingHeaderClone;
     } else {
-      dataUpdate = this.state.settingHeader;
+      dataUpdate = settingHeaderClone;
       dataUpdate.dtSetting = moment(dataUpdate.dtSetting).format('MM/DD/YYYY');
     }
 
@@ -135,6 +153,7 @@ class CourseExpirarionRules extends React.Component {
       item => (item.inExpire = item.inExpire ? 1 : 0)
     );
 
+    console.log(this.state.arraySettingProvBoard);
     postCourseExpirationRules(dataUpdate)
       .then(() => {
         swal({
@@ -173,7 +192,7 @@ class CourseExpirarionRules extends React.Component {
     }
   }
   handleAdd(e) {
-  
+
     const [ newSettingSplice ] = this.state.arraySettingProvBoard
 
     const containerNewSettings = {
@@ -190,26 +209,32 @@ class CourseExpirarionRules extends React.Component {
         }
       })
     };
-     console.log(containerNewSettings)
 
       this.setState({
         newSettingHeader: containerNewSettings,
-        flagAdd: true
+        flagAdd: true,
+        disableButtonRefresh: false,
+        disableInputSetting: true,
+        disableOptionDefault: true
       });
 
   }
   loadingData() {
+
     if (
-      Object.keys(this.state.settingHeader).length !== 0 ||
-      Object.keys(this.state.newSettingHeader).length !== 0
+     (this.state.settingHeader && Object.keys(this.state.settingHeader).length >= 1) ||
+     ( this.state.settingHeader && this.state.newSettingHeader && Object.keys(this.state.newSettingHeader).length >= 1 )
     ) {
+
+
       var itemParent;
       var itemSetting;
       if (this.state.flagAdd === true) {
         itemParent = this.state.newSettingHeader;
 
-        itemSetting = this.state.newSettingHeader.settingDetails;
+        [...itemSetting] = this.state.newSettingHeader.settingDetails;
       } else {
+        console.log(this.state.settingHeader.settingDetails);
         itemParent = this.state.settingHeader;
 
         itemSetting = this.state.settingHeader.settingDetails;
@@ -233,7 +258,7 @@ class CourseExpirarionRules extends React.Component {
           <br />
 
           <form>
-           
+
             <Table responsive="md">
               <thead className="thead-dark">
                 <tr className="">
@@ -241,7 +266,7 @@ class CourseExpirarionRules extends React.Component {
                   <th className="App-align">
 
                     <div className="container-fluid  pt-1">
-                        <div className="row App-align "> 
+                        <div className="row App-align ">
                           <div className="col-sm-4 app-top">
                             Expire after
                           </div>
@@ -252,7 +277,7 @@ class CourseExpirarionRules extends React.Component {
                   type="number"
                   value={itemParent.amAnytimeInactive}
                   onChange={this.handleChangeMonthInactive}
-                /> 
+                />
                           </div>
                           <div className="col-sm-4 app-top">
                             inactive month
@@ -261,7 +286,7 @@ class CourseExpirarionRules extends React.Component {
                     </div>
                   </th>
                   <th>
-                  
+
                   </th>
                   <th >Active months</th>
                 </tr>
@@ -281,10 +306,10 @@ class CourseExpirarionRules extends React.Component {
                         </div>
                       </td>
                       <td>
-                        
+
                       </td>
                       <td>
-                        
+
                         <div className="form-group row">
                           <input
                             id="anytime"
@@ -307,7 +332,7 @@ class CourseExpirarionRules extends React.Component {
                   <th className="App-align">
 
                     <div className="container-fluid  pt-1">
-                        <div className="row App-align "> 
+                        <div className="row App-align ">
                           <div className="col-sm-4 app-top">
                             Expire after
                           </div>
@@ -318,7 +343,7 @@ class CourseExpirarionRules extends React.Component {
                   type="number"
                   value={itemParent.amLiveInactive}
                   onChange={this.handleChangeMonthInactive}
-                /> 
+                />
                           </div>
                           <div className="col-sm-4 app-top">
                             inactive month
@@ -327,7 +352,7 @@ class CourseExpirarionRules extends React.Component {
                     </div>
                   </th>
                   <th>
-                  
+
                   </th>
                   <th >Active months</th>
                 </tr>
@@ -347,7 +372,7 @@ class CourseExpirarionRules extends React.Component {
                         </div>
                       </td>
                       <td>
-                        
+
                       </td>
                       <td>
                         <div className="form-group row">
@@ -383,7 +408,13 @@ class CourseExpirarionRules extends React.Component {
   }
 
   render() {
-    const items = this.state.arraySettingProvBoard;
+    if (!this.state.flagAdd) {
+      var items  = this.state.arraySettingProvBoard;
+    const [...itemsfilter]  = this.state.arraySettingProvBoard;
+    console.log(itemsfilter);
+
+    }
+
     if (this.state.hasError) {
       return (
         <Alert variant="danger ">
@@ -395,31 +426,34 @@ class CourseExpirarionRules extends React.Component {
     return (
       <div>
         <div className="container-fluid ">
-        
+
           <div className="row">
             <div className="col-12 App-rules">
             <a className ="btn btn-outline-success mb-2" href = {process.env.REACT_APP_URL_SETTING_PROVIDER+'/sa_app_settings.asp'}>  Return </a>
               <div className="mb-2">
               <h3>Course expiration rules</h3>
-              
+
               <h6>{this.props.params.nmBoard}</h6>
               <h6 className="text-muted">
                 Apply for Board Approved provider status
               </h6>
               <br />
               <h6 >Course special rules by approval date</h6>
-              </div>              
-              
+              </div>
+
               <div className="container-fluid App-search">
-                <div className="row"> 
+                <div className="row">
                   <div className="col-4 App-container">
                   <Form>
-                <Form.Group>                  
+                <InputGroup>
+
                   <Form.Control
                     as="select"
                     onChange={this._onChange}
+                    disabled={this.state.disableInputSetting}
+                    ref={this.input}
                   >
-                    <option value="">*Select a settings*</option>
+                    <option disabled={this.state.disableOptionDefault}>*Select a settings*</option>
                     {items &&
                       items.map((item, key) => (
                         <option key={key} value={item.idSetting}>
@@ -429,7 +463,11 @@ class CourseExpirarionRules extends React.Component {
                         </option>
                       ))}
                   </Form.Control>
-                </Form.Group>
+                  <InputGroup.Append>
+                  <button className="btn btn-primary" onClick={this.enableList} disabled={this.state.disableButtonRefresh}> Refresh </button>
+                  </InputGroup.Append>
+                </InputGroup>
+
               </Form>
                   </div>
                   <div className="col-8">
@@ -438,6 +476,7 @@ class CourseExpirarionRules extends React.Component {
                     className="App-date"
                     selected={this.state.startDate}
                     onChange={this.handleDate}
+
                   />
                   <InputGroup.Append>
                     <button
@@ -451,8 +490,8 @@ class CourseExpirarionRules extends React.Component {
                   </div>
                 </div>
               </div>
-              
-              
+
+
             </div>
           </div>
         </div>
