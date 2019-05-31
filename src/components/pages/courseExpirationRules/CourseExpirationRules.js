@@ -44,11 +44,20 @@ class CourseExpirarionRules extends React.Component {
   }
   handleChangeMonthInactive(e) {
     var monthInactive;
+    const {newSettingHeader,settingHeader } = this.state;
+    
+
+     const newSettingHeaderClone = {...newSettingHeader};
+     const settingHeaderClone = {...settingHeader}
+
+     console.log(newSettingHeaderClone);
+     console.log(settingHeaderClone);
+
 
     if (this.state.flagAdd === true) {
-      monthInactive = this.state.newSettingHeader;
+      monthInactive = newSettingHeaderClone;
     } else {
-      monthInactive = this.state.settingHeader;
+      monthInactive = settingHeaderClone;
     }
     if (e.target.value >= 0) {
       if (e.target.id === 'anytime') {
@@ -164,29 +173,30 @@ class CourseExpirarionRules extends React.Component {
     }
   }
   handleAdd(e) {
-    const newSettingSplice = this.state.arraySettingProvBoard.splice(
-      this.state.arraySettingProvBoard.length - 1
-    );
-    const newSetting = newSettingSplice.map(i => {
-      i.dtSetting = moment(this.state.startDate).format('MM/DD/YYYY');
-      i.amLiveInactive = 0;
-      i.amAnytimeInactive = 0;
-      i.idSetting = null;
+  
+    const [ newSettingSplice ] = this.state.arraySettingProvBoard
 
-      i.settingDetails.map(item => {
-        item.inExpire = 0;
-        item.amActive = 0;
-        return item;
-      });
-      return i;
-    });
+    const containerNewSettings = {
+      ...newSettingSplice,
+      dtSetting: moment(this.state.startDate).format('MM/DD/YYYY'),
+      amLiveInactive: 0,
+      amAnytimeInactive: 0,
+      idSetting: null,
+      settingDetails: newSettingSplice.settingDetails.map(({inExpire,amActive,...settingDetail}) => {
+        return {
+          inExpire: 0,
+          amActive: 0,
+          ...settingDetail
+        }
+      })
+    };
+     console.log(containerNewSettings)
 
-    newSetting.map(i => {
       this.setState({
-        newSettingHeader: i,
+        newSettingHeader: containerNewSettings,
         flagAdd: true
       });
-    });
+
   }
   loadingData() {
     if (

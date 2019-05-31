@@ -7,7 +7,7 @@ export const getCourseExpirationRules = (boardProvTypeId) => {
     method: 'get',
     url: `http://localhost:4000/settings/course/expiration/${boardProvTypeId}`,
     headers: {
-      Authorization: `Bearer up8bvgyZ9mQn4G8Tmbz965sh4JV-GAiMrVGGDaVlhrPDc0G9Ebz8lQaA2nRT_IAlh66bn-uu8uT65N5yn1IVLA52OpnGLdhPBMH9fNlwYnK7pXHdtPmLyBq9KyGKIhDwgif8UgPTtydsbvyHkX_w1SWuNIXxFYDx4jA28fwmawnYJ0hWiCF1Zc8O18N2pxR0Cv4lmNENchXN8hM1Pn_pPPe7gsBz70wMGCoeCwNcomoLvqK1_Pk4OY72ikX7bE5Z7l6XStHCp0r5u3KA7ZOceeI9Swelt0OU3chUdC2uAWs19kieon0OdSbHe53-X1vh1ujV2FJelBvauxstsM_z7qy-QJ0U-nSHYQ7ZmIF2rzkdEx5nL0XlfGBPtHI4Fenq-HDjNPF1BjUgfoaZ20kZGIQ8nM-F81tWWoAlMzQILdODCIp01ScAq-H0L_ZGDbNh4B7-ok4wQUsaHoxGGcmUVP_EIa4`
+      Authorization: `Bearer KTlwomGllOaRH1M4EDNDHx88cshx6CrCcESf2-ehl9INjTtqp75wenpiNAkNlE0ga5muI_6c9_AvxB0hL1bwu8FpgLHPc82jRV31Me0qojjdn64pGkwN2X6RC_4AzzkTtMAm05T7M7bEGjkPCD5tG43YN2gTOPd7E2sfsOM-2w5AqeDX310yJLChY4h6RBT7W97aGWbECWzZeTFn-KiivDp9gXwp6FcU5OitenxAKLYcbU99Py9e6GYxbQavqmrIuh9LwDsXMfvI5LGqYQIcoP4RIpCqDadk4HVvxyrSFD3FYjmLDw36ft6EqgP7Mmpmx4wbTv7IYbhKN7S7l8N4Nt-8PO9AfHpYKXtbMHM7zKUKmhBXxzC9T0Qrv74fXZC0g0kuxoyH_KZjuGXlLGzHII-mIXw0VQ98ZkwviXihNH2VJXBvzNPjzN6sd2cy-Z1WBz2yGIZCp4zhg03qq-YH-4yrqMs`
     },
     timeout: 120000
       
@@ -23,7 +23,7 @@ export const postCourseExpirationRules = (data) => {
     method: 'post',
     url: `http://localhost:4000/settings/course/expiration`,     
     headers: {
-      Authorization: `Bearer up8bvgyZ9mQn4G8Tmbz965sh4JV-GAiMrVGGDaVlhrPDc0G9Ebz8lQaA2nRT_IAlh66bn-uu8uT65N5yn1IVLA52OpnGLdhPBMH9fNlwYnK7pXHdtPmLyBq9KyGKIhDwgif8UgPTtydsbvyHkX_w1SWuNIXxFYDx4jA28fwmawnYJ0hWiCF1Zc8O18N2pxR0Cv4lmNENchXN8hM1Pn_pPPe7gsBz70wMGCoeCwNcomoLvqK1_Pk4OY72ikX7bE5Z7l6XStHCp0r5u3KA7ZOceeI9Swelt0OU3chUdC2uAWs19kieon0OdSbHe53-X1vh1ujV2FJelBvauxstsM_z7qy-QJ0U-nSHYQ7ZmIF2rzkdEx5nL0XlfGBPtHI4Fenq-HDjNPF1BjUgfoaZ20kZGIQ8nM-F81tWWoAlMzQILdODCIp01ScAq-H0L_ZGDbNh4B7-ok4wQUsaHoxGGcmUVP_EIa4`
+      Authorization: `Bearer KTlwomGllOaRH1M4EDNDHx88cshx6CrCcESf2-ehl9INjTtqp75wenpiNAkNlE0ga5muI_6c9_AvxB0hL1bwu8FpgLHPc82jRV31Me0qojjdn64pGkwN2X6RC_4AzzkTtMAm05T7M7bEGjkPCD5tG43YN2gTOPd7E2sfsOM-2w5AqeDX310yJLChY4h6RBT7W97aGWbECWzZeTFn-KiivDp9gXwp6FcU5OitenxAKLYcbU99Py9e6GYxbQavqmrIuh9LwDsXMfvI5LGqYQIcoP4RIpCqDadk4HVvxyrSFD3FYjmLDw36ft6EqgP7Mmpmx4wbTv7IYbhKN7S7l8N4Nt-8PO9AfHpYKXtbMHM7zKUKmhBXxzC9T0Qrv74fXZC0g0kuxoyH_KZjuGXlLGzHII-mIXw0VQ98ZkwviXihNH2VJXBvzNPjzN6sd2cy-Z1WBz2yGIZCp4zhg03qq-YH-4yrqMs`
     },
     timeout: 120000,
     data
