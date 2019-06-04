@@ -62,9 +62,9 @@
 
 .animated.delay-4s {
   -webkit-animation-delay: 4s;
-  animation-delay: 4s; 
+  animation-delay: 4s;
 }
- 
+
 .animated.delay-5s {
   -webkit-animation-delay: 5s;
   animation-delay: 5s;
@@ -83,7 +83,7 @@
 .animated.slow {
   -webkit-animation-duration: 2s;
   animation-duration: 2s;
-} 
+}
 
 .animated.slower {
   -webkit-animation-duration: 3s;
@@ -111,6 +111,7 @@
     border-radius: .25rem;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
+
 .App-active {
   width: 40%;
   padding: .01rem .65rem;
@@ -119,7 +120,7 @@
   background-color: #fff;
   background-clip: padding-box;
   border: 1px solid #ced4da;
-  border-radius: .25rem;  
+  border-radius: .25rem;
   vertical-align: middle!important;
   transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
@@ -161,6 +162,9 @@
 }
 .App-container{
   padding-left: 0px!important;
+}
+.App-with{
+  width: 40%!important;
 }
 
 
